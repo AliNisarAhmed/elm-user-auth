@@ -6,9 +6,9 @@ import Url.Parser as UP
 
 
 type Route
-    = NotFoundPage
-    | LandingPage
-    | RegisterPage
+    = NotFoundRoute
+    | LandingRoute
+    | RegisterRoute
 
 
 pushUrl : Route -> Nav.Key -> Cmd msg
@@ -20,13 +20,13 @@ pushUrl route navKey =
 routeToString : Route -> String
 routeToString route =
     case route of
-        LandingPage ->
+        LandingRoute ->
             "/"
 
-        RegisterPage ->
+        RegisterRoute ->
             "/register"
 
-        NotFoundPage ->
+        NotFoundRoute ->
             "/404"
 
 
@@ -37,12 +37,12 @@ parseUrl url =
             route
 
         Nothing ->
-            NotFoundPage
+            NotFoundRoute
 
 
 matchRoute : UP.Parser (Route -> a) a
 matchRoute =
     UP.oneOf
-        [ UP.map LandingPage UP.top
-        , UP.map RegisterPage (UP.s "register")
+        [ UP.map LandingRoute UP.top
+        , UP.map RegisterRoute (UP.s "register")
         ]

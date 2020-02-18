@@ -4,20 +4,23 @@ import Browser as Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
 import Element as E
 import Element.Input as Input
+import Page.Register as Register
+import Routes exposing (Route(..))
 import Styles as S
-import Url as U
-import Page.RegisterPage as RegisterRoute
+import Url exposing (Url)
+
 
 type Page
     = MainPage
-    | RegisterPage RegisterRoute.Model
-
+    | RegisterPage Register.Model
+    | NotFoundPage
 
 
 type Msg
     = OnUrlRequest UrlRequest
-    | OnUrlChange U.Url
-    | RegisterPageMsg RegisterRoute.Msg
+    | OnUrlChange Url.Url
+    | RegisterPageMsg Register.Msg
+
 
 
 ---- MODEL ----
@@ -26,28 +29,80 @@ type Msg
 type alias Model =
     { page : Page
     , navKey : Nav.Key
+    , route : Route
     }
 
 
-init : () -> U.Url -> Nav.Key -> ( Model, Cmd Msg )
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
         model =
             { navKey = navKey
             , page = MainPage
+            , route = Routes.parseUrl url
             }
     in
-    ( model, Cmd.none )
+    initCurrentPage ( model, Cmd.none )
+
+
+
+-- This function is needed to display the page for the current
+-- route
+
+
+initCurrentPage : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+initCurrentPage ( model, currentCmds ) =
+    let
+        ( currentPage, mappedPageCmds ) =
+            case model.route of
+                Routes.LandingRoute ->
+                    ( MainPage, currentCmds )
+
+                Routes.RegisterRoute ->
+                    let
+                        ( pageModel, pageCmds ) =
+                            Register.init model.navKey
+                    in
+                    ( RegisterPage pageModel, Cmd.map RegisterPageMsg pageCmds )
+
+                _ ->
+                    ( NotFoundPage, Cmd.none )
+    in
+    ( { model | page = currentPage }
+    , Cmd.batch [ currentCmds, mappedPageCmds ]
+    )
 
 
 
 ---- UPDATE ----
 
 
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case (msg, model.page) of
+    case ( msg, model.page ) of
+        ( RegisterPageMsg pageMsg, RegisterPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmds ) =
+                    Register.update pageMsg pageModel
+            in
+            ( { model | page = RegisterPage updatedPageModel }
+            , Cmd.map RegisterPageMsg updatedCmds
+            )
+
+        ( OnUrlRequest urlRequest, _ ) ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model
+                    , Nav.pushUrl model.navKey (Url.toString url)
+                    )
+
+                Browser.External url ->
+                    ( model
+                    , Nav.load url
+                    )
+
+        ( _, _ ) ->
+            ( model, Cmd.none )
 
 
 
@@ -60,25 +115,31 @@ view model =
     , body =
         [ E.layout [] <|
             E.column S.pageStyles <|
-                currentView model
+                [ currentView model ]
         ]
     }
 
 
-currentView : Model -> List (E.Element msg)
+currentView : Model -> E.Element Msg
 currentView model =
     case model.page of
         MainPage ->
             viewMainPage
 
+        RegisterPage pageModel ->
+            Register.view pageModel
+                |> E.map RegisterPageMsg
 
-viewMainPage : List (E.Element msg)
+        NotFoundPage ->
+            E.row [] [ E.text "Not found" ]
+
+
+viewMainPage : E.Element Msg
 viewMainPage =
-    [ E.row S.buttonRowStyles
-        [ Input.button S.loginButton { onPress = Nothing, label = E.text "Log In" }
-        , Input.button S.registerButton { onPress = Nothing, label = E.text "Register" }
+    E.row S.buttonRowStyles
+        [ E.link S.loginButton { url = "/", label = E.text "Log In" }
+        , E.link S.registerButton { url = "/register", label = E.text "Register" }
         ]
-    ]
 
 
 

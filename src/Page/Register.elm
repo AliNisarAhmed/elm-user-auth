@@ -1,5 +1,6 @@
-module Page.RegisterPage exposing (..)
+module Page.Register exposing (..)
 
+import Browser.Navigation as Nav
 import Element as E
 
 
@@ -15,8 +16,8 @@ type alias Model =
     {}
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Nav.Key -> ( Model, Cmd Msg )
+init navKey =
     ( {}, Cmd.none )
 
 
