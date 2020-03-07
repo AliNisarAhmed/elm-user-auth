@@ -71,9 +71,21 @@ buttonRowStyles =
 
 textInput : List (E.Attribute msg)
 textInput =
-    [ E.centerX, E.width (E.px 400), E.height (E.px 40), B.color offWhite ]
+    [ E.centerX
+    , E.centerY
+    , E.width (E.px 350)
+    , E.height (E.px 35)
+    , B.color offWhite
+    , Font.size 16
+    , Font.color primaryColor
+    ]
 
 
 textInputLabel : List (E.Attribute msg)
 textInputLabel =
     [ Font.color secondaryColor, E.alignLeft ]
+
+
+placeHolder : List (E.Attribute msg)
+placeHolder =
+    [ Font.size 13, Font.color primaryColor ]

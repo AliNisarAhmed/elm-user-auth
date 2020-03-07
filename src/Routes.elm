@@ -9,6 +9,7 @@ type Route
     = NotFoundRoute
     | LandingRoute
     | RegisterRoute
+    | LoginRoute
 
 
 pushUrl : Route -> Nav.Key -> Cmd msg
@@ -25,6 +26,9 @@ routeToString route =
 
         RegisterRoute ->
             "/register"
+
+        LoginRoute ->
+            "/login"
 
         NotFoundRoute ->
             "/404"
@@ -45,4 +49,5 @@ matchRoute =
     UP.oneOf
         [ UP.map LandingRoute UP.top
         , UP.map RegisterRoute (UP.s "register")
+        , UP.map LoginRoute (UP.s "login")
         ]
