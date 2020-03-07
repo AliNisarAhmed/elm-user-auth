@@ -101,6 +101,15 @@ update msg model =
             , Cmd.map RegisterPageMsg updatedCmds
             )
 
+        ( LoginPageMsg pageMsg, LoginPage pageModel ) ->
+            let
+                ( updatedPageModel, updatedCmds ) =
+                    Login.update pageMsg pageModel
+            in
+            ( { model | page = LoginPage updatedPageModel }
+            , Cmd.map LoginPageMsg updatedCmds
+            )
+
         ( OnUrlRequest urlRequest, _ ) ->
             case urlRequest of
                 Browser.Internal url ->
@@ -161,8 +170,8 @@ currentView model =
 viewMainPage : E.Element Msg
 viewMainPage =
     E.row S.buttonRowStyles
-        [ E.link S.loginButton { url = "/login", label = E.text "Log In" }
-        , E.link S.registerButton { url = "/register", label = E.text "Register" }
+        [ E.link S.textButton { url = "/login", label = E.text "Log In" }
+        , E.link S.bigButton { url = "/register", label = E.text "Register" }
         ]
 
 

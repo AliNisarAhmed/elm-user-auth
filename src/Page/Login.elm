@@ -34,8 +34,8 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        OnUserNameChange s ->
-            ( { model | userName = s }, Cmd.none )
+        OnUserNameChange name ->
+            ( { model | userName = name }, Cmd.none )
 
         OnPasswordChange s ->
             ( { model | password = s }, Cmd.none )
@@ -62,7 +62,7 @@ view model =
                 , show = False
                 }
             , Input.button
-                (S.registerButton
+                (S.bigButton
                     ++ [ centerX
                        , width (px 300)
                        , spacingXY 0 100

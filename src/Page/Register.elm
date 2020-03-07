@@ -157,7 +157,7 @@ view model =
                 , show = False
                 }
             , Input.button
-                (S.registerButton
+                (S.bigButton
                     ++ [ E.centerX
                        , E.width (E.px 400)
                        ]

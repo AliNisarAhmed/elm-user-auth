@@ -3,7 +3,14 @@ module Styles exposing (..)
 import Element as E
 import Element.Background as B
 import Element.Border as Border
+import Element.Events as Events
 import Element.Font as Font
+import Html.Attributes exposing (class)
+
+
+addTransition : E.Attribute msg
+addTransition =
+    E.htmlAttribute <| class "transition"
 
 
 
@@ -44,23 +51,27 @@ buttonWidth =
     E.px 150
 
 
-loginButton : List (E.Attribute msg)
-loginButton =
+textButton : List (E.Attribute msg)
+textButton =
     [ E.padding 20
     , E.width buttonWidth
     , Font.color white
     , B.color primaryColor
-    , E.mouseOver [ Font.color secondaryColor ]
+    , E.mouseOver [ Font.color secondaryColor, E.scale 1.2 ]
+    , Border.rounded 5
+    , addTransition
     ]
 
 
-registerButton : List (E.Attribute msg)
-registerButton =
+bigButton : List (E.Attribute msg)
+bigButton =
     [ E.padding 20
     , E.width buttonWidth
     , Font.color primaryColor
     , B.color secondaryColor
     , E.mouseOver [ Font.color white, E.scale 1.1 ]
+    , Border.rounded 5
+    , addTransition
     ]
 
 
