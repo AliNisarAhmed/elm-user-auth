@@ -4,6 +4,9 @@ import Browser.Navigation as Nav
 import Element exposing (..)
 import Element.Input as Input
 import Http
+import Json.Decoders exposing (..)
+import Json.Encode as Encode
+import Ports as P
 import Styles as S
 
 
@@ -11,6 +14,8 @@ type alias Model =
     { navKey : Nav.Key
     , userName : String
     , password : String
+    , serverUrl : String
+    , errors : List String
     }
 
 
@@ -19,6 +24,8 @@ init navKey serverUrl =
     ( { navKey = navKey
       , userName = ""
       , password = ""
+      , serverUrl = serverUrl
+      , errors = []
       }
     , Cmd.none
     )
@@ -28,7 +35,7 @@ type Msg
     = OnUserNameChange String
     | OnPasswordChange String
     | OnLoginRequest
-    | OnLoginResponse
+    | OnLoginResponse (Result Http.Error LoginResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -40,8 +47,41 @@ update msg model =
         OnPasswordChange s ->
             ( { model | password = s }, Cmd.none )
 
+        OnLoginRequest ->
+            ( model, requestLogin model )
+
+        OnLoginResponse (Ok loginResponse) ->
+            ( model, P.saveToken <| Debug.log "ReceivedToken: " <| loginResponse.token )
+
         _ ->
             ( model, Cmd.none )
+
+
+
+---- SUBSCRIPTIONS ----
+
+
+requestLogin : Model -> Cmd Msg
+requestLogin model =
+    let
+        body =
+            Http.jsonBody encoded
+
+        encoded =
+            Encode.object
+                [ ( "userName", Encode.string model.userName )
+                , ( "password", Encode.string model.password )
+                ]
+    in
+    Http.post
+        { url = model.serverUrl ++ "/api/users/authenticate"
+        , body = body
+        , expect = Http.expectJson OnLoginResponse loginResponseDecoder
+        }
+
+
+
+---- VIEW ----
 
 
 view : Model -> Element Msg
@@ -68,7 +108,7 @@ view model =
                        , spacingXY 0 100
                        ]
                 )
-                { onPress = Nothing
+                { onPress = Just OnLoginRequest
                 , label = text "Submit"
                 }
             ]

@@ -4,6 +4,9 @@ import Browser as Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
 import Element as E
 import Element.Input as Input
+import Json.Decode as Decode
+import Json.Decoders exposing (..)
+import Page.Home as Home
 import Page.Login as Login
 import Page.Register as Register
 import Routes exposing (Route(..))
@@ -15,6 +18,7 @@ type Page
     = MainPage
     | RegisterPage Register.Model
     | LoginPage Login.Model
+    | HomePage Home.Model
     | NotFoundPage
 
 
@@ -23,6 +27,7 @@ type Msg
     | OnUrlChange Url.Url
     | RegisterPageMsg Register.Msg
     | LoginPageMsg Login.Msg
+    | HomePageMsg Home.Msg
 
 
 
@@ -34,17 +39,28 @@ type alias Model =
     , navKey : Nav.Key
     , route : Route
     , serverUrl : String
+    , token : Maybe String
     }
 
 
-init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+defaultFlag : Flags
+defaultFlag =
+    { token = Nothing
+    }
+
+
+init : Decode.Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
+        token =
+            Decode.decodeValue flagsDecoder flags
+
         model =
             { navKey = navKey
             , page = MainPage
             , route = Routes.parseUrl url
             , serverUrl = "https://localhost:44354"
+            , token = .token <| Result.withDefault defaultFlag token
             }
     in
     initCurrentPage ( model, Cmd.none )
@@ -163,6 +179,9 @@ currentView model =
             Login.view pageModel
                 |> E.map LoginPageMsg
 
+        HomePage pageModel ->
+            E.map HomePageMsg <| Home.view pageModel
+
         NotFoundPage ->
             E.row [] [ E.text "Not found" ]
 
@@ -179,7 +198,7 @@ viewMainPage =
 ---- PROGRAM ----
 
 
-main : Program () Model Msg
+main : Program Decode.Value Model Msg
 main =
     Browser.application
         { init = init

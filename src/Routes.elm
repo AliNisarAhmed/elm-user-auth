@@ -10,6 +10,7 @@ type Route
     | LandingRoute
     | RegisterRoute
     | LoginRoute
+    | HomeRoute
 
 
 pushUrl : Route -> Nav.Key -> Cmd msg
@@ -29,6 +30,9 @@ routeToString route =
 
         LoginRoute ->
             "/login"
+
+        HomeRoute ->
+            "/home"
 
         NotFoundRoute ->
             "/404"
@@ -50,4 +54,5 @@ matchRoute =
         [ UP.map LandingRoute UP.top
         , UP.map RegisterRoute (UP.s "register")
         , UP.map LoginRoute (UP.s "login")
+        , UP.map HomeRoute (UP.s "home")
         ]
